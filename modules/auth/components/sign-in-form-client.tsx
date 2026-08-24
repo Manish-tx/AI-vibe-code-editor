@@ -12,14 +12,17 @@ import {
 import { Chrome, Github } from "lucide-react";
 import { signIn } from "@/auth";
 
-async function handleGoogleSignIn(){
-"use server"
-await signIn("google")
+const hasGoogle = !!process.env.AUTH_GOOGLE_ID && !!process.env.AUTH_GOOGLE_SECRET;
+const hasGithub = !!process.env.AUTH_GITHUB_ID && !!process.env.AUTH_GITHUB_SECRET;
+
+async function handleGoogleSignIn() {
+  "use server";
+  await signIn("google");
 }
 
-async function handleGithubSignIn(){
-"use server"
-await signIn("github")
+async function handleGithubSignIn() {
+  "use server";
+  await signIn("github");
 }
 
 const SignInFormClient = () => {
@@ -30,23 +33,36 @@ const SignInFormClient = () => {
           Sign In
         </CardTitle>
         <CardDescription className="text-center">
-          Choose your preferred sign-in method
+          {hasGoogle || hasGithub
+            ? "Choose your preferred sign-in method"
+            : "Add OAuth credentials to enable sign-in"}
         </CardDescription>
       </CardHeader>
 
       <CardContent className="grid gap-4">
-        <form action={handleGoogleSignIn}>
-          <Button type="submit" variant={"outline"} className="w-full">
-            <Chrome className="mr-2 h-4 w-4" />
-            <span>Sign in with google</span>
-          </Button>
-        </form>
-        <form action={handleGithubSignIn}>
-          <Button type="submit" variant={"outline"} className="w-full">
-            <Github className="mr-2 h-4 w-4" />
-            <span>Sign in with github</span>
-          </Button>
-        </form>
+        {hasGoogle && (
+          <form action={handleGoogleSignIn}>
+            <Button type="submit" variant={"outline"} className="w-full">
+              <Chrome className="mr-2 h-4 w-4" />
+              <span>Sign in with google</span>
+            </Button>
+          </form>
+        )}
+
+        {hasGithub && (
+          <form action={handleGithubSignIn}>
+            <Button type="submit" variant={"outline"} className="w-full">
+              <Github className="mr-2 h-4 w-4" />
+              <span>Sign in with github</span>
+            </Button>
+          </form>
+        )}
+
+        {!hasGoogle && !hasGithub && (
+          <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+            OAuth credentials are not configured yet. Add your Google or GitHub client ID and secret in the environment file, then restart the app.
+          </div>
+        )}
       </CardContent>
 
       <CardFooter>
